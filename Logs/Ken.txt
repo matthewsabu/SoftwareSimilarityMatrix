@@ -1,2 +1,0 @@
-prog1.java and prog2.java have a similarity rate of 75.0% when compared per line.
-prog1.java and prog2.java have a similarity rate of 97.0297% when compared per character.

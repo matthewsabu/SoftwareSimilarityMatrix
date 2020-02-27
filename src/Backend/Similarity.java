@@ -1,131 +1,235 @@
 package Backend;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Similarity {
-    private float  percentage = 0;
-    private Scanner prog1Scan, prog2Scan;
-    private File filename1, filename2;
+    private float  percentage=0,longestLength=0;
+    private Scanner checkerScan, comparisonScan;
     private Matrix data = new Matrix();
-    private Matrix character = new Matrix();
+    private String similarString = "";
+    private FileHandling files= new FileHandling();
+    private ArrayList<ProgramLine> arrayA,arrayB;
+    private ArrayList<String> firstSameCode= new ArrayList<>();
+    private ArrayList<String> secondSameCode= new ArrayList<>();
 
     public void ReadCodeLine() {
-        float sameLines=0,prog1Lines=0,prog2Lines=0,totalLines=0,longestLength=0;
-        String longestString = "";
+        int sameLines=0,totalLines=0;
+        ProgramLine progLine;
 
-        while(prog1Scan.hasNextLine() || prog2Scan.hasNextLine()){
+        arrayA = new ArrayList<>();
+        arrayB = new ArrayList<>();
 
-            if(!prog1Scan.hasNextLine() && prog2Scan.hasNextLine()){
-                prog2Lines++;
+        while(checkerScan.hasNextLine() || comparisonScan.hasNextLine()) {
 
-                String prog2_line = prog2Scan.nextLine();
-                //System.out.println("PROG 2 LINE: " + prog2_line);
+            if(!checkerScan.hasNextLine() && comparisonScan.hasNextLine()) {
+                String line2 = comparisonScan.nextLine();
 
-            } else if(!prog2Scan.hasNextLine() && prog1Scan.hasNextLine()){
-                prog1Lines++;
-
-                String prog1_line = prog1Scan.nextLine();
-                //System.out.println("PROG 1 LINE: "+prog1_line);
-
-            } else {
-
-                String prog1_line = prog1Scan.nextLine();
-                //System.out.println("PROG 1 LINE: "+prog1_line);
-
-                String prog2_line = prog2Scan.nextLine();
-                //System.out.println("PROG 2 LINE: " + prog2_line);
-
-                if(prog1_line.equals(prog2_line)){
-                    if(prog1_line.length() > longestLength){
-                        longestString = prog1_line;
-                        longestLength = longestString.length();
-                    }
-                    sameLines++;
+                if(!line2.trim().isEmpty()) {
+                    progLine = new ProgramLine(line2,false);
+                    arrayB.add(progLine);
+                    totalLines++;
                 }
-
             }
-            totalLines++;
+            else if (checkerScan.hasNextLine() && !comparisonScan.hasNextLine()) {
+                String line1 = checkerScan.nextLine();
+
+                if(!line1.trim().isEmpty()) {
+                    progLine = new ProgramLine(line1,false);
+                    arrayA.add(progLine);
+                    totalLines++;
+                }
+            }
+            else {
+                String line1 = checkerScan.nextLine();
+                String line2 = comparisonScan.nextLine();
+
+                if(!line1.trim().isEmpty()) {
+                    progLine = new ProgramLine(line1,false);
+                    arrayA.add(progLine);
+                }
+                if(!line2.trim().isEmpty()) {
+                    progLine = new ProgramLine(line2,false);
+                    arrayB.add(progLine);
+                }
+            }
         }
-        //System.out.println("SAME: " + sameLines);
-        //System.out.println("TOTAL: " + totalLines);
-        //System.out.println("\nLongest Similar Line: \n" + longestString);
 
-        //System.out.println("same: " + sameLines + " and total: " + totalLines);
-        percentage = (sameLines / totalLines);
-        //percentage = (float)((sameLines/totalLines)-0.5) * 2; //testing for negatives
-    }
+        if(arrayA.size() > arrayB.size()) totalLines = arrayA.size();
+        else totalLines = arrayB.size();
 
 
-    public void ReadCodeCharacter() {
-        int countChar = 0;
-        int countTotal = 0;
-        while (true) {
-            if (prog1Scan.hasNext() && prog2Scan.hasNext()) {
-                String data1 = prog1Scan.nextLine();
-                String data2 = prog2Scan.nextLine();
-                int i = 0;
-                while (true) {
-                    if (i < data1.length() && i < data2.length()) {
-                        if (data1.charAt(i) == data2.charAt(i)) {
-                            countChar++;
-                            countTotal++;
-                        }
-                        i++;
-                    } else if (i < data2.length()) {
-                        countTotal++;
-                        i++;
-                    } else if (i < data1.length()) {
-                        countTotal++;
-                        i++;
-                    } else {
-                        break;
+        for(int x = 0; x< arrayA.size(); x++){  //arrayA.size()
+            for(int y = 0; y< arrayB.size(); y++){  //arrayB.size()
+                if(arrayA.get(x).getLine().equals(arrayB.get(y).getLine())){
+                    int currentLength = arrayA.get(x).getLine().length();
+                    if(currentLength > longestLength) {
+                        similarString = arrayA.get(x).getLine();
+                        longestLength = currentLength;
+                    }
+                    if(!arrayB.get(y).isCompared() && !arrayA.get(x).isCompared()) {
+                        arrayB.get(y).setCompared(true);
+                        arrayA.get(x).setCompared(true);
+                        sameLines++;
                     }
                 }
-
-            } else if (prog1Scan.hasNext()) {
-                countTotal = countTotal + prog1Scan.nextLine().length();
-            } else if (prog2Scan.hasNext()) {
-                countTotal = countTotal + prog2Scan.nextLine().length();
-            } else {
-                break;
             }
-
         }
-        prog1Scan.close();
-        prog2Scan.close();
-        percentage = ((float) countChar / (float) countTotal);
-        //percentage = (float)((countChar/countTotal)-0.5) * 2; //testing for negatives
 
+        checkerScan.close();
+        comparisonScan.close();
+        percentage = ((float)sameLines / (float)totalLines);
     }
 
-    public void readFile(String comparison) throws FileNotFoundException {
+    public ArrayList<ProgramLine> getArrayA(){
+        return arrayA;
+    }
 
-        File prog1File = new File("Codes");
-        File prog2File = new File("Codes");
-        File[] file1 = prog1File.listFiles();
-        File[] file2 = prog2File.listFiles();
+    public ArrayList<ProgramLine> getArrayB(){
+        return arrayB;
+    }
 
-        data.newMatrix();
+    public String longestString(){
+        return similarString;
+    }
 
-        for(int i=0; i<file1.length; i++) //file1.length
+    public void ReadCodeString() {
+        int countString = 0;
+        int countTotal;
+        int j=0;
+        boolean compare;
+        ArrayList<String> firstCode= new ArrayList<>();
+        ArrayList<String> secondCode= new ArrayList<>();
+        getAllStrings(checkerScan,firstCode);
+        getAllStrings(comparisonScan,secondCode);
+
+        if(firstCode.size()>=secondCode.size()) countTotal=firstCode.size();
+        else countTotal=secondCode.size();
+
+        while(j<firstCode.size())
         {
-            data.setNewArray();
-
-            this.filename1=file1[i];
-            for(int j=0; j<file2.length; j++) //file2.length
+            compare=false;
+            for(int i=0; i<secondCode.size(); i++)
             {
-                this.filename2=file2[j];
-                prog1Scan = new Scanner(filename1);
-                prog2Scan = new Scanner(filename2);
-                if(comparison.equals("data")) ReadCodeLine();
-                else ReadCodeCharacter();
+                if(firstCode.get(j).equals(secondCode.get(i)))
+                {
+                    countString++;
+                    firstSameCode.add(firstCode.get(j));
+                    secondSameCode.add(secondCode.get(i));
+                    firstCode.remove(j);
+                    secondCode.remove(i);
+                    compare=true;
+                    break;
+                }
+            }
+            if(!compare)
+            {
+                j++;
+            }
+        }
 
-                //form.addArray(percentage);  //raw percentage
+        checkerScan.close();
+        comparisonScan.close();
+        percentage = ((float) countString / (float) countTotal);
+    }
+
+    public ArrayList<String> getFirstCode(){
+        return firstSameCode;
+    }
+
+    public ArrayList<String> getSecondCode(){
+        return secondSameCode;
+    }
+
+    private void getAllStrings(Scanner scan, ArrayList<String> code)
+    {
+        while(scan.hasNext())
+        {
+            String[] line= scan.nextLine().split("^[a-zA-Z]+$");
+            for(String s :line)
+            {
+                if(!s.equals("")) {
+                    code.add(s);
+                    if (s.length() >= similarString.length()) similarString = s;
+                }
+            }
+        }
+    }
+
+    public void setCheckerScan(Scanner sc){
+        this.checkerScan=sc;
+    }
+
+    public void setComparisonScan(Scanner cs){
+        this.comparisonScan=cs;
+    }
+
+
+    //creating the correlation Matrix
+    public void creationMatrix(String comparison,ArrayList<String> type,String filePath) throws IOException, NullPointerException {
+        similarString=" ";
+
+        File checkerFile, comparisonFile; //storing for files when comparing
+        File prog1File;
+        if(filePath.equals("")) {
+            prog1File = new File("Codes");
+        } else {
+            filePath=filePath.replaceAll("\\\\", "\\\\\\\\");
+            prog1File = new File(filePath);
+        }
+        File[] dir = prog1File.listFiles(); // getting all file in the Codes directory
+        data.newMatrix(); // creating a new correlation matrix
+        data.newUsers(); // clearing all of the data in the userArrayList
+        data.newRepo();
+
+        //Delete the files inside the mergedCodes directory to avoid duplication
+        File mergeFile= new File("MergedCodes");
+        files.deleteFilesMerge(mergeFile);
+
+        files.setFilter(type);
+        files.getAllFiles(dir,data);// starts to recursively check all of the codes in the folder
+
+        //gets all of the merged files
+        File[] codes= mergeFile.listFiles();
+
+        //comparing files
+        for(int i=0; i<codes.length; i++)   //codes.length
+        {
+            data.setNewArray();// creating a new array for the checker file
+            checkerFile=codes[i];
+            for(int j=0; j<codes.length;j++)   //codes.length
+            {
+                comparisonFile=codes[j];
+                checkerScan = new Scanner(checkerFile);
+                comparisonScan = new Scanner(comparisonFile);
+                //checks whether the user chose the to compare by line or by character
+                if(comparison.equals("line")) ReadCodeLine();
+                else ReadCodeString();
                 data.addArray((float)(Math.round(percentage*100.0)/100.0));  //two decimal points
             }
-            data.setMatrix();
+            data.setMatrix();//saving the data gathered to another array list for the correlation matrix
+        }
+        generateScores();
+    }
+
+    public void generateScores()
+    {
+        for(int i=0; i<data.matrixSize(); i++)
+        {
+            for(int j=i+1; j<data.getMatrix().get(i).size(); j++)
+            {
+                data.setRowRepo(data.getUserFileNames().get(i));
+                data.setColumnRepo(data.getUserFileNames().get(j));
+                data.setResults(data.getMatrix().get(i).get(j));
+            }
+        }
+        data.sortData();
+
+        for(int i=0; i<data.matrixSize(); i++) {
+            System.out.println();
+            System.out.print(data.getRowRepo(i) + " " + data.getColumnRepo(i) + " " + data.getResults(i));
         }
 
     }
@@ -133,5 +237,7 @@ public class Similarity {
     public Matrix getMatrix(){
         return data;
     }
+
+
 
 }

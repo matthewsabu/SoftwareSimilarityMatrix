@@ -12,16 +12,12 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Stage stage = primaryStage;
 
-        FXMLLoader fxmloader = new FXMLLoader(getClass().getResource("../FXML/Status.fxml"));
+        FXMLLoader fxmloader = new FXMLLoader(getClass().getResource("../FXML/Interface.fxml"));
         Parent root =fxmloader.load();
 
         primaryStage.setTitle("Software Similarity Program");
-        primaryStage.setScene(new Scene(root, 1600, 850));
-
-//        UsernameController passCont = fxmloader.getController();
-//        passCont.passStage(stage);
+        primaryStage.setScene(new Scene(root, 1400, 850));  //interface
 
         primaryStage.show();
     }

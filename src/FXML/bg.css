@@ -1,0 +1,30 @@
+.anchor{
+    -fx-background-image: url('bg.jpg');
+    -fx-background-position: center center;
+    -fx-background-size: 100% 100%;
+}
+
+.labelSmall{
+    -fx-font-size: 15px;
+    -fx-font-family: "Georgia";
+    -fx-text-fill: black;
+}
+
+.labelHeader{
+    -fx-font-size: 16px;
+    -fx-font-family: "Georgia";    /*Georgia Bold*/
+    -fx-font-weight: bold;
+    -fx-text-fill: black;
+}
+
+.labelTitle{
+    -fx-font-size: 40px;
+    -fx-font-family: "Georgia";
+    -fx-text-fill: black;
+}
+
+.labelNumbers{
+    -fx-font-size: 15px;
+    -fx-font-family: "Trebuchet MS";
+    -fx-text-fill: black;
+}
